@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import time
+
 from pymongo import MongoClient
 import gridfs
-from utils import get_file, clean_data, Config
-import time
 
 import pefile
 import peutils
+from utils import get_file, clean_data, Config
 
 JOBNAME = 'PE'
 SLEEPTIME = 1
@@ -25,7 +26,9 @@ logch.setLevel(logging.ERROR)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -39,9 +42,12 @@ fs = gridfs.GridFS(db)
 signatures = peutils.SignatureDatabase('userdb.txt')
 
 while True:
-    for (sampleno, sample) in enumerate(db.vxcage.find({'$and': [{'pe': {'$exists': False}}, {'filetype': {'$regex': 'PE32.*'}}]})):
+    for (sampleno, sample) in \
+        enumerate(db.vxcage.find({'$and': [{'pe': {'$exists': False}},
+                  {'filetype': {'$regex': 'PE32.*'}}]})):
         try:
-            logger.info('[%s] Processing sample %s' % (sampleno, sample['sha256']))
+            logger.info('[%s] Processing sample %s' % (sampleno,
+                        sample['sha256']))
             key = {'sha256': sample['sha256']}
 
             # download sample file
@@ -59,8 +65,10 @@ while True:
             # Store results
 
             logger.debug('[%s] Storing results into MongoDB' % sampleno)
-            db.fs.files.update(key, {'$set': {'pe': peheader}}, upsert=True)
-            db.fs.files.update(key, {'$set': {'peid': peid}}, upsert=True)
+            db.fs.files.update(key, {'$set': {'pe': peheader}},
+                               upsert=True)
+            db.fs.files.update(key, {'$set': {'peid': peid}},
+                               upsert=True)
             logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:
             logger.exception(e)
@@ -68,4 +76,3 @@ while True:
 
     logger.info('Sleeping %s minutes' % SLEEPTIME)
     time.sleep(SLEEPTIME * 60)
-

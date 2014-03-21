@@ -7,10 +7,8 @@ import time
 
 from pymongo import MongoClient
 import gridfs
-import hashlib
-import pydeep
 
-from utils import get_file, Config
+from utils import Config
 
 JOBNAME = 'BASENAME'
 SLEEPTIME = 1
@@ -27,7 +25,9 @@ logch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -40,18 +40,26 @@ fs = gridfs.GridFS(db)
 
 while True:
     try:
-        for (sampleno, sample) in enumerate(db.fs.files.find({'filename': {'$regex': '.*/.*' }})):
+        for (sampleno, sample) in \
+            enumerate(db.fs.files.find({'filename': {'$regex': '.*/.*'
+                      }})):
             try:
-                logger.info('[%s] Processing sample %s' % (sampleno, sample['md5']))
+                logger.info('[%s] Processing sample %s' % (sampleno,
+                            sample['md5']))
                 key = {'md5': sample['md5']}
 
-                logger.debug('[%s] Old name: %s' % (sampleno, sample['filename']))
+                logger.debug('[%s] Old name: %s' % (sampleno,
+                             sample['filename']))
                 newfilename = os.path.basename(sample['filename'])
-                logger.debug('[%s] New name: %s' % (sampleno, newfilename))
+                logger.debug('[%s] New name: %s' % (sampleno,
+                             newfilename))
 
-                logger.debug('[%s] Storing results into MongoDB' % sampleno)
+                logger.debug('[%s] Storing results into MongoDB'
+                             % sampleno)
 
-                db.fs.files.update(key, {'$set': {'filename': newfilename}}, upsert=True)
+                db.fs.files.update(key,
+                                   {'$set': {'filename': newfilename}},
+                                   upsert=True)
 
                 logger.debug('[%s] Removing temporary data' % sampleno)
                 del key

@@ -26,7 +26,9 @@ logch.setLevel(logging.INFO)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -39,9 +41,11 @@ fs = gridfs.GridFS(db)
 
 while True:
     try:
-        for (sampleno, sample) in enumerate(db.fs.files.find({'sha1': {'$exists': False}})):
+        for (sampleno, sample) in \
+            enumerate(db.fs.files.find({'sha1': {'$exists': False}})):
             try:
-                logger.info('[%s] Processing sample %s' % (sampleno, sample['md5']))
+                logger.info('[%s] Processing sample %s' % (sampleno,
+                            sample['md5']))
                 key = {'md5': sample['md5']}
 
                 metadata = {}
@@ -61,9 +65,11 @@ while True:
 
                 # Store results
 
-                logger.debug('[%s] Storing results into MongoDB' % sampleno)
+                logger.debug('[%s] Storing results into MongoDB'
+                             % sampleno)
                 for (metakey, metaval) in metadata.iteritems():
-                    db.fs.files.update(key, {'$set': {metakey: metaval}}, upsert=True)
+                    db.fs.files.update(key,
+                            {'$set': {metakey: metaval}}, upsert=True)
 
                 logger.debug('[%s] Removing temporary data' % sampleno)
                 del key

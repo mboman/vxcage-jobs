@@ -3,16 +3,14 @@
 
 import logging
 from pymongo import MongoClient
-import os
 import gridfs
 from utils import get_file, Config
 import time
 
 import string
 
-from pprint import pprint
-
 JOBNAME = 'STRINGS'
+SLEEPTIME = 1
 
 # create logger
 
@@ -26,7 +24,9 @@ logch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -51,9 +51,11 @@ def strings(filedata, min=4):
 
 while True:
     try:
-        for (sampleno, sample) in enumerate(db.fs.files.find({'strings': {'$exists': False}})):
+        for (sampleno, sample) in \
+            enumerate(db.fs.files.find({'strings': {'$exists': False}})):
             try:
-                logger.info('[%s] Processing sample %s' % (sampleno, sample['sha256']))
+                logger.info('[%s] Processing sample %s' % (sampleno,
+                            sample['sha256']))
                 key = {'sha256': sample['sha256']}
 
                 logger.debug('[%s] Downloading data' % sampleno)
@@ -63,13 +65,14 @@ while True:
 
                 logger.debug('[%s] Analysing' % sampleno)
                 stringdata = strings(data)
-                pprint(list(strings(data)))
 
                 # Store results
 
                 logger.debug('Storing results into MongoDB')
 
-                # db.fs.files.update(key, {"$set" : {'strings' : stringdata}}, upsert=True)
+                db.fs.files.update(key,
+                                   {'$set': {'strings': stringdata}},
+                                   upsert=True)
 
                 logger.debug('Removing temporary data')
                 del key
@@ -87,4 +90,3 @@ while True:
 
     logger.info('Sleeping %s minutes' % SLEEPTIME)
     time.sleep(SLEEPTIME * 60)
-

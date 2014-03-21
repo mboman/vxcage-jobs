@@ -25,7 +25,9 @@ logch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -60,9 +62,11 @@ def mycallback(data):
 
 
 while True:
-    for (sampleno, sample) in enumerate(db.fs.files.find({'yara': {'$exists': False}})):
+    for (sampleno, sample) in \
+        enumerate(db.fs.files.find({'yara': {'$exists': False}})):
         try:
-            logger.info('[%s] Processing sample %s' % (sampleno, sample['sha256']))
+            logger.info('[%s] Processing sample %s' % (sampleno,
+                        sample['sha256']))
             samplekey = {'sha256': sample['sha256']}
             metadata = []
 
@@ -80,8 +84,11 @@ while True:
 
             if len(metadata) > 0:
                 metadata = clean_data(metadata)
-                logger.debug('[%s] Storing results into MongoDB' % sampleno)
-                db.fs.files.update(samplekey, {'$set': {'yara': metadata}}, upsert=True)
+                logger.debug('[%s] Storing results into MongoDB'
+                             % sampleno)
+                db.fs.files.update(samplekey,
+                                   {'$set': {'yara': metadata}},
+                                   upsert=True)
                 logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:
             logger.exception(e)

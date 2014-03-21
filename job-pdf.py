@@ -27,7 +27,9 @@ logch.setLevel(logging.ERROR)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -80,8 +82,10 @@ while True:
             # Store results
 
             if pdfid:
-                logger.debug('[%s] Storing results into MongoDB' % sampleno)
-                db.fs.files.update(key, {'$set': {'pdfid': pdfid}}, upsert=True)
+                logger.debug('[%s] Storing results into MongoDB'
+                             % sampleno)
+                db.fs.files.update(key, {'$set': {'pdfid': pdfid}},
+                                   upsert=True)
             logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:
             logger.exception(e)

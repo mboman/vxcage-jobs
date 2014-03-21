@@ -25,7 +25,9 @@ logch.setLevel(logging.ERROR)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -47,9 +49,11 @@ uselessexifkey = [
     ]
 
 while True:
-    for (sampleno, sample) in enumerate(db.fs.files.find({'exif': {'$exists': False}})):
+    for (sampleno, sample) in \
+        enumerate(db.fs.files.find({'exif': {'$exists': False}})):
         try:
-            logger.info('[%s] Processing sample %s' % (sampleno, sample['sha256']))
+            logger.info('[%s] Processing sample %s' % (sampleno,
+                        sample['sha256']))
             key = {'sha256': sample['sha256']}
 
             # download sample file
@@ -66,11 +70,13 @@ while True:
                 for exifkey in uselessexifkey:
                     del metadata[exifkey]
 
-                logger.debug('[%s] Storing results into MongoDB' % sampleno)
+                logger.debug('[%s] Storing results into MongoDB'
+                             % sampleno)
 
                 # metadata = clean_data(metadata)
 
-                db.fs.files.update(key, {'$set': {'exif': metadata}}, upsert=True)
+                db.fs.files.update(key, {'$set': {'exif': metadata}},
+                                   upsert=True)
                 logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:
             logger.exception(e)

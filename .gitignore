@@ -37,3 +37,4 @@ nosetests.xml
 
 # Hide the real configuration file from the public.
 job.conf
+*.nja

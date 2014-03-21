@@ -3,6 +3,7 @@
 
 import logging
 import time
+import tempfile
 
 from pymongo import MongoClient
 import gridfs
@@ -60,7 +61,9 @@ logch.setLevel(logging.INFO)
 
 # create formatter and add it to the handlers
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = \
+    logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                      )
 logch.setFormatter(formatter)
 
 # add the handlers to the logger
@@ -73,9 +76,11 @@ fs = gridfs.GridFS(db)
 
 while True:
     try:
-        for (sampleno, sample) in enumerate(db.fs.files.find({'filetype': {'$exists': False}})):
+        for (sampleno, sample) in \
+            enumerate(db.fs.files.find({'filetype': {'$exists': False}})):
             try:
-                logger.info('[%s] Processing sample %s' % (sampleno, sample['sha256']))
+                logger.info('[%s] Processing sample %s' % (sampleno,
+                            sample['sha256']))
                 samplekey = {'sha256': sample['sha256']}
 
                 # download sample file
@@ -90,9 +95,12 @@ while True:
 
                 # Store results
 
-                logger.debug('[%s] Storing results into MongoDB' % sampleno)
+                logger.debug('[%s] Storing results into MongoDB'
+                             % sampleno)
                 if file_type:
-                    db.fs.files.update(samplekey, {'$set': {'filetype': file_type}}, upsert=True)
+                    db.fs.files.update(samplekey,
+                            {'$set': {'filetype': file_type}},
+                            upsert=True)
 
                 # delete sample file
 
