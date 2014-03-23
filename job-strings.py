@@ -59,16 +59,21 @@ while True:
                 key = {'sha256': sample['sha256']}
 
                 logger.debug('[%s] Downloading data' % sampleno)
-                data = get_file(db, sha256=sample)
+                data = get_file(db, sha256=sample['sha256'])
 
                 # Do analysis
 
                 logger.debug('[%s] Analysing' % sampleno)
-                stringdata = strings(data)
+                stringdata = list()
+                for s in strings(data):
+                    stringdata.append(s)
+
+                stringdata = list(set(stringdata))
 
                 # Store results
 
                 logger.debug('Storing results into MongoDB')
+                #logger.debug('Strings: %s' % '\n'.join(stringdata))
 
                 db.fs.files.update(key,
                                    {'$set': {'strings': stringdata}},
