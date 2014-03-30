@@ -43,7 +43,7 @@ signatures = peutils.SignatureDatabase('userdb.txt')
 
 while True:
     for (sampleno, sample) in \
-        enumerate(db.vxcage.find({'$and': [{'pe': {'$exists': False}},
+        enumerate(db.fs.files.find({'$and': [{'pe': {'$exists': False}},
                   {'filetype': {'$regex': 'PE32.*'}}]})):
         try:
             logger.info('[%s] Processing sample %s' % (sampleno,
