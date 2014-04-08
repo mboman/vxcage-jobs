@@ -96,12 +96,14 @@ def clean_data(obj):
 
 def get_file(
     db,
+    filename=None,
     md5=None,
     sha1=None,
     sha256=None,
     sha512=None,
     ):
     ''' Retrieves a file from GridFS and returns it as a byte-stream
+    @filename: if set the data is saved to the file instead of being returned as a string
     @md5: md5 hash of the file to retreive
     @sha1: sha1 hash of the file to retreive
     @sha256: sha256 hash of the file to retreive
@@ -127,7 +129,13 @@ def get_file(
         if _id:
             fh = fs.get(_id)
             if fh:
-                return fh.read()
+                if filename:
+                    lfh = open(filename,'wb')
+                    for chunk in fh.readchunk():
+                        lfh.write(chunk)
+                    lfh.close()
+                    return filename
+                else:
+                    return fh.read()
     return None
-
 
