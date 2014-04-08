@@ -48,17 +48,18 @@ if Config().virustotal.proxy:
 while True:
     try:
         for (sampleno, sample) in \
-            enumerate(db.fs.files.find({'virustotal': {'$exists': False}})):
+            enumerate(db.fs.files.find({'virustotal': {'$exists': False}},
+                      timeout=False)):
             try:
                 logger.info('[%s] Processing sample %s' % (sampleno,
                             sample['sha256']))
                 key = {'sha256': sample['sha256']}
                 parameters = {'resource': sample['sha256'],
                               'apikey': api_key}
-    
+
                 logger.debug('[%s] Analysing' % sampleno)
                 r = requests.post(url, data=parameters, proxies=proxy)
-    
+
                 VTjson = None
                 logger.debug('[%s] Response headers: %s' % (sampleno,
                              r.headers))
@@ -71,12 +72,12 @@ while True:
                         VTjson = clean_data(json.loads(r.text))
                     except Exception:
                         logger.debug('[%s] Unknown response: %s'
-                                     % (sampleno, r.content))
-    
+                                % (sampleno, r.content))
+
                 if VTjson:
                     if VTjson['response_code'] == 1:
                         logger.debug('[%s] Storing results into MongoDB'
-                                     % sampleno)
+                                 % sampleno)
                         db.fs.files.update(key,
                                 {'$set': {'virustotal': VTjson}},
                                 upsert=True)
@@ -85,13 +86,12 @@ while True:
                         logger.warn('[%s] File Does Not Exist in VirusTotal'
                                      % sampleno)
             except Exception, e:
-    
+
                 logger.exception(e)
                 pass
     except Exception, e:
 
         logger.exception(e)
-
 
     logger.info('Sleeping %s minutes' % SLEEPTIME)
     time.sleep(SLEEPTIME * 60)

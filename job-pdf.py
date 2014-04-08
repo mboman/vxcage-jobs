@@ -63,7 +63,7 @@ def get_pdfid(file_data):
 while True:
     for (sampleno, sample) in \
         enumerate(db.fs.files.find({'$and': [{'pdfid': {'$exists': False}},
-                  {'filetype': {'$regex': 'PDF.*'}}]})):
+                  {'filetype': {'$regex': 'PDF.*'}}]}, timeout=False)):
         try:
             logger.info('[%s] Processing sample %s' % (sampleno,
                         sample['sha256']))

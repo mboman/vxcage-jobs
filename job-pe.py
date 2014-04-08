@@ -44,7 +44,7 @@ signatures = peutils.SignatureDatabase('userdb.txt')
 while True:
     for (sampleno, sample) in \
         enumerate(db.fs.files.find({'$and': [{'pe': {'$exists': False}},
-                  {'filetype': {'$regex': 'PE32.*'}}]})):
+                  {'filetype': {'$regex': 'PE32.*'}}]}, timeout=False)):
         try:
             logger.info('[%s] Processing sample %s' % (sampleno,
                         sample['sha256']))

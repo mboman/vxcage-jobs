@@ -42,7 +42,7 @@ while True:
     try:
         for (sampleno, sample) in \
             enumerate(db.fs.files.find({'filename': {'$regex': '.*/.*'
-                      }})):
+                      }}), timeout=False):
             try:
                 logger.info('[%s] Processing sample %s' % (sampleno,
                             sample['md5']))

@@ -52,7 +52,8 @@ def strings(filedata, min=4):
 while True:
     try:
         for (sampleno, sample) in \
-            enumerate(db.fs.files.find({'strings': {'$exists': False}})):
+            enumerate(db.fs.files.find({'strings': {'$exists': False}},
+                      timeout=False)):
             try:
                 logger.info('[%s] Processing sample %s' % (sampleno,
                             sample['sha256']))
@@ -73,7 +74,8 @@ while True:
                 # Store results
 
                 logger.debug('Storing results into MongoDB')
-                #logger.debug('Strings: %s' % '\n'.join(stringdata))
+
+                # logger.debug('Strings: %s' % '\n'.join(stringdata))
 
                 db.fs.files.update(key,
                                    {'$set': {'strings': stringdata}},

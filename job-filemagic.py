@@ -77,7 +77,8 @@ fs = gridfs.GridFS(db)
 while True:
     try:
         for (sampleno, sample) in \
-            enumerate(db.fs.files.find({'filetype': {'$exists': False}})):
+            enumerate(db.fs.files.find({'filetype': {'$exists': False}},
+                      timeout=False)):
             try:
                 logger.info('[%s] Processing sample %s' % (sampleno,
                             sample['sha256']))
