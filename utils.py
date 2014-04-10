@@ -4,6 +4,7 @@
 import ConfigParser
 import logging
 import string
+import os
 
 import gridfs
 
@@ -131,7 +132,7 @@ def get_file(
             if fh:
                 if filename:
                     lfh = open(filename,'wb')
-                    for chunk in fh.readchunk():
+                    for chunk in fh.read(size=result['chunkSize']):
                         lfh.write(chunk)
                     lfh.close()
                     return filename
