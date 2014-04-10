@@ -6,9 +6,12 @@ from pymongo import MongoClient
 import gridfs
 from utils import get_file, clean_data, Config
 import time
+import os
 
 import exiftool
 import tempfile
+
+from pprint import pprint
 
 JOBNAME = 'EXIF'
 SLEEPTIME = 5
@@ -21,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 
 logch = logging.StreamHandler()
-logch.setLevel(logging.ERROR)
+logch.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
 
@@ -61,26 +64,26 @@ while True:
 
             with exiftool.ExifTool() as et:
                 logger.debug('[%s] Downloading data' % sampleno)
-                tfile = tempfile.NamedTemporaryFile(mode='w+b')
-                tfile.write(get_file(db, sha256=sample['sha256']))
-                tfile.flush()
+                filename='/tmp/' + sample['sha256']
+                get_file(db, filename=filename, sha256=sample['sha256'])
                 logger.debug('[%s] Analysing' % sampleno)
-                metadata = clean_data(et.get_metadata(tfile.name))
+                metadata = et.get_metadata(filename)
                 logger.debug('[%s] Deleting temporary file' % sampleno)
-                tfile.close()
-                for exifkey in uselessexifkey:
-                    del metadata[exifkey]
-
+                os.remove(filename)
                 logger.debug('[%s] Storing results into MongoDB'
                              % sampleno)
 
-                # metadata = clean_data(metadata)
+                for exifkey in uselessexifkey:
+                    del metadata[exifkey]
+
+                metadata = clean_data(metadata)
 
                 db.fs.files.update(key, {'$set': {'exif': metadata}},
                                    upsert=True)
                 logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:
             logger.exception(e)
+
             pass
 
     logger.info('Sleeping %s minutes' % SLEEPTIME)
