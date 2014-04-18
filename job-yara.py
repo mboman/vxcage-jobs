@@ -34,7 +34,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().job.dbhost, port=Config().job.dbport)
+client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -68,7 +68,9 @@ while True:
         try:
             logger.info('[%s] Processing sample %s' % (sampleno,
                         sample['sha256']))
-            samplekey = {'sha256': sample['sha256']}
+            sample_key = {'_id': sample['_id']}
+            job_key = {'md5': sample['md5']}
+
             metadata = []
 
             # download sample file
@@ -87,8 +89,9 @@ while True:
                 metadata = clean_data(metadata)
                 logger.debug('[%s] Storing results into MongoDB'
                              % sampleno)
-                db.fs.files.update(samplekey,
-                                   {'$set': {'yara': metadata}},
+                yara_id = db.yara.update(job_key, metadata, upsert=True)
+                db.fs.files.update(sample_key,
+                                   {'$set': {'yara': yara_id}},
                                    upsert=True)
                 logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:

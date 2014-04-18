@@ -33,7 +33,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().job.dbhost, port=Config().job.dbport)
+client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -57,7 +57,8 @@ while True:
             try:
                 logger.info('[%s] Processing sample %s' % (sampleno,
                             sample['sha256']))
-                key = {'sha256': sample['sha256']}
+                sample_key = {'_id': sample['_id']}
+                job_key = {'md5': sample['md5']}
 
                 logger.debug('[%s] Downloading data' % sampleno)
                 data = get_file(db, sha256=sample['sha256'])
@@ -77,8 +78,10 @@ while True:
 
                 # logger.debug('Strings: %s' % '\n'.join(stringdata))
 
-                db.fs.files.update(key,
-                                   {'$set': {'strings': stringdata}},
+                strings_id = db.strings.update(job_key, stringdata,
+                        upsert=True)
+                db.fs.files.update(sample_key,
+                                   {'$set': {'strings': strings_id}},
                                    upsert=True)
 
                 logger.debug('Removing temporary data')

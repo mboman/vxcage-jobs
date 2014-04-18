@@ -35,7 +35,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().job.dbhost, port=Config().job.dbport)
+client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -44,6 +44,9 @@ api_key = Config().virustotal.api_key
 if Config().virustotal.proxy:
     proxy = {'http': Config().virustotal.proxy,
              'https': Config().virustotal.proxy}
+else:
+    proxy = {}
+
 
 while True:
     try:
@@ -53,7 +56,9 @@ while True:
             try:
                 logger.info('[%s] Processing sample %s' % (sampleno,
                             sample['sha256']))
-                key = {'sha256': sample['sha256']}
+                sample_key = {'sample_id': sample['_id']}
+                job_key = {'md5': sample['md5']}
+
                 parameters = {'resource': sample['sha256'],
                               'apikey': api_key}
 
@@ -78,8 +83,10 @@ while True:
                     if VTjson['response_code'] == 1:
                         logger.debug('[%s] Storing results into MongoDB'
                                  % sampleno)
-                        db.fs.files.update(key,
-                                {'$set': {'virustotal': VTjson}},
+                        vt_id = db.virustotal.update(job_key, VTjson,
+                                upsert=True)
+                        db.fs.files.update(sample_key,
+                                {'$set': {'virustotal': vt_id}},
                                 upsert=True)
                         logger.info('[%s] Metadata updated' % sampleno)
                     else:

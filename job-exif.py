@@ -37,7 +37,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().job.dbhost, port=Config().job.dbport)
+client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -58,18 +58,22 @@ while True:
         try:
             logger.info('[%s] Processing sample %s' % (sampleno,
                         sample['sha256']))
-            key = {'sha256': sample['sha256']}
+            sample_key = {'_id': sample['_id']}
+            job_key = {'md5': sample['md5']}
 
             # download sample file
 
             with exiftool.ExifTool() as et:
                 logger.debug('[%s] Downloading data' % sampleno)
-                filename='/tmp/' + sample['sha256']
+                filename = os.path.join('/', 'tmp', sample['sha256'])
                 get_file(db, filename=filename, sha256=sample['sha256'])
+
                 logger.debug('[%s] Analysing' % sampleno)
                 metadata = et.get_metadata(filename)
+
                 logger.debug('[%s] Deleting temporary file' % sampleno)
                 os.remove(filename)
+
                 logger.debug('[%s] Storing results into MongoDB'
                              % sampleno)
 
@@ -78,12 +82,13 @@ while True:
 
                 metadata = clean_data(metadata)
 
-                db.fs.files.update(key, {'$set': {'exif': metadata}},
+                exif_id = db.exif.update(job_key, metadata, upsert=True)
+                db.fs.files.update(sample_key,
+                                   {'$set': {'exif': exif_id}},
                                    upsert=True)
                 logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:
             logger.exception(e)
-
             pass
 
     logger.info('Sleeping %s minutes' % SLEEPTIME)
