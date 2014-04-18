@@ -13,38 +13,7 @@ try:
 except ImportError:
     pass
 
-from utils import get_file, clean_data, Config
-
-
-def get_type(file_data):
-    try:
-        ms = magic.open(magic.MAGIC_NONE)
-        ms.load()
-        file_type = ms.buffer(file_data)
-        logger.debug('Got magic through method #1 [ms.buffer(file_data)]'
-                     )
-    except:
-        try:
-            file_type = magic.from_buffer(file_data)
-            logger.debug('Got magic through method #2 [magic.from_buffer(file_data)]'
-                         )
-        except:
-            try:
-                import subprocess
-                file_path = tempfile.NamedTemporaryFile(mode='w+b')
-                file_path.write(file_data)
-                file_path.flush()
-                file_process = subprocess.Popen(['file', '-b',
-                        file_path], stdout=subprocess.PIPE)
-                file_type = file_process.stdout.read().strip()
-                file_path.close()
-                logger.debug('Got magic through method #3 [OS command execution]'
-                             )
-            except:
-                return None
-
-    return file_type
-
+from utils import get_file, clean_data, get_type, Config
 
 JOBNAME = 'FILEMAGIC'
 SLEEPTIME = 1
@@ -70,7 +39,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
+client = MongoClient(host=Config().database.dbhost, port=Config().database.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 

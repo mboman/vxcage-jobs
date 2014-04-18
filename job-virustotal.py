@@ -35,7 +35,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
+client = MongoClient(host=Config().database.dbhost, port=Config().database.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -83,10 +83,8 @@ while True:
                     if VTjson['response_code'] == 1:
                         logger.debug('[%s] Storing results into MongoDB'
                                  % sampleno)
-                        vt_id = db.virustotal.update(job_key, VTjson,
-                                upsert=True)
                         db.fs.files.update(sample_key,
-                                {'$set': {'virustotal': vt_id}},
+                                {'$set': {'virustotal': VTjson}},
                                 upsert=True)
                         logger.info('[%s] Metadata updated' % sampleno)
                     else:

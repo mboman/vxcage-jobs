@@ -36,7 +36,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
+client = MongoClient(host=Config().database.dbhost, port=Config().database.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -85,9 +85,8 @@ while True:
             if pdfid:
                 logger.debug('[%s] Storing results into MongoDB'
                              % sampleno)
-                pdf_id = db.pdf.update(job_key, pdfid, upsert=True)
                 db.fs.files.update(sample_key,
-                                   {'$set': {'pdfid': pdf_id}},
+                                   {'$set': {'pdfid': pdfid}},
                                    upsert=True)
             logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:

@@ -33,7 +33,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
+client = MongoClient(host=Config().database.dbhost, port=Config().database.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 

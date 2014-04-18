@@ -37,7 +37,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
+client = MongoClient(host=Config().database.dbhost, port=Config().database.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -82,9 +82,8 @@ while True:
 
                 metadata = clean_data(metadata)
 
-                exif_id = db.exif.update(job_key, metadata, upsert=True)
                 db.fs.files.update(sample_key,
-                                   {'$set': {'exif': exif_id}},
+                                   {'$set': {'exif': metadata}},
                                    upsert=True)
                 logger.info('[%s] Metadata updated' % sampleno)
         except Exception, e:

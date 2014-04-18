@@ -35,7 +35,7 @@ logch.setFormatter(formatter)
 
 logger.addHandler(logch)
 
-client = MongoClient(host=Config().vxcage.dbhost, port=Config().vxcage.dbport)
+client = MongoClient(host=Config().database.dbhost, port=Config().database.dbport)
 db = client.vxcage
 fs = gridfs.GridFS(db)
 
@@ -67,9 +67,7 @@ while True:
 
             logger.debug('[%s] Storing PEDump results into MongoDB' % sampleno)
 
-            pedump_id = db.fs.files.update(job_key, peheader,
-                    upsert=True)
-            db.fs.files.update(sample_key, {'$set': {'pe': pedump_id}},
+            db.fs.files.update(sample_key, {'$set': {'pe': peheader}},
                                upsert=True)
 
 
