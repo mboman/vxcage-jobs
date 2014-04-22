@@ -61,7 +61,7 @@ while True:
                 # Do analysis
 
                 logger.debug('[%s] Analysing' % sampleno)
-                file_type = clean_data(get_type(data))
+                file_type = get_type(data)
 
                 # Store results
 
