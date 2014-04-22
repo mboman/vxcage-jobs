@@ -33,6 +33,7 @@ import StringIO
 import json
 import logging
 import string
+import os
 
 try:
     from pymongo import MongoClient
@@ -54,7 +55,7 @@ class Dictionary(dict):
 
 class Config:
 
-    def __init__(self, cfg='vxcage.conf'):
+    def __init__(self, cfg=os.path.join(os.path.dirname(os.path.realpath(__file__)),'vxcage.conf')):
         config = ConfigParser.ConfigParser()
         config.read(cfg)
 
@@ -165,7 +166,6 @@ def put_file(
 
 def get_file(
     db,
-    generator=False,
     filename=None,
     md5=None,
     sha1=None,
@@ -200,14 +200,10 @@ def get_file(
             if fh:
                 if filename:
                     lfh = open(filename, 'wb')
-                    for chunk in fh.readchunk():
+                    for chunk in fh.read(size=fh.chunk_size):
                         lfh.write(chunk)
                     lfh.close()
                     return filename
-                if generator:
-                    for chunk in fh.readchunk():
-                        yield chunk
-                    return
                 else:
                     return fh.read()
     return None
